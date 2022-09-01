@@ -8,7 +8,7 @@ namespace Core.Entities
                             string lastName,
                             string email,
                             string? image)
-        {
+        { 
             Name = name;
             LastName = lastName;
             Image = image;

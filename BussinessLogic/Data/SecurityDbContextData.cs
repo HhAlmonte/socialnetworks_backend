@@ -19,7 +19,7 @@ namespace BussinessLogic.Data
                     UserName = "Sstewiie"
                 };
 
-                await userManager.CreateAsync(user, "Bryan12s");
+                await userManager.CreateAsync(user, "Bryan12s#");
             }
         }
     }
