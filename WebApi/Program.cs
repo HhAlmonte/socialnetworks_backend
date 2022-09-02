@@ -3,28 +3,27 @@ using BussinessLogic.Logic;
 using Core.Entities;
 using Core.Interface;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using WebApi.DTOs;
 using WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 var identityBuilder = builder.Services.AddIdentityCore<UserEntities>();
 
-// IdentityBuilder container
+// IdentityBuilder container.
+
 identityBuilder = new IdentityBuilder(identityBuilder.UserType, identityBuilder.Services);
 identityBuilder.AddEntityFrameworkStores<SecurityDbContext>();
 identityBuilder.AddSignInManager<SignInManager<UserEntities>>();
 
 // Add services to the container.
-builder.Services.AddControllers();
 
-builder.Services.AddDbContext<SecurityDbContext>(x =>
-{
-    x.UseSqlServer(builder.Configuration.GetConnectionString("IdentitySecurityConnection"));
-});
+builder.Services.AddControllers();
 
 builder.Services.TryAddSingleton<ISystemClock, SystemClock>();
 
@@ -32,7 +31,26 @@ builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
 builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
 
+builder.Services.AddScoped<ITokenService, TokenService>();
+
 builder.Services.AddCors();
+
+builder.Services.AddDbContext<SecurityDbContext>(x =>
+{
+    x.UseSqlServer(builder.Configuration.GetConnectionString("IdentitySecurityConnection"));
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:Key"])),
+        ValidIssuer = builder.Configuration["token:Issuer"],
+        ValidateIssuer = true,
+        ValidateAudience = false
+    };
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -9,5 +9,6 @@
         public string? PhoneNumber { get; set; }
         public string? Image { get; set; }
         public DateTime Created { get; set; }
+        public string? Token { get; set; }
     }
 }

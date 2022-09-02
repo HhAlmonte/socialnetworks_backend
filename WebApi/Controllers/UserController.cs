@@ -13,11 +13,14 @@ namespace WebApi.Controllers
         private readonly UserManager<UserEntities> _userManager;
         private readonly SignInManager<UserEntities> _signInManager;
         private readonly IAzureBlobStorageService _azureBlobStorageService;
+        private readonly ITokenService _tokenService;
 
         public UserController(UserManager<UserEntities> userManager,
                               SignInManager<UserEntities> signInManager,
-                              IAzureBlobStorageService azureBlobStorageService)
+                              IAzureBlobStorageService azureBlobStorageService,
+                              ITokenService tokenService)
         {
+            _tokenService = tokenService;
             _azureBlobStorageService = azureBlobStorageService;
             _userManager = userManager;
             _signInManager = signInManager;
@@ -48,7 +51,8 @@ namespace WebApi.Controllers
                 UserName = user.UserName,
                 Created = user.Created,
                 PhoneNumber = user.PhoneNumber,
-                Image = user.Image
+                Image = user.Image,
+                Token = _tokenService.CreateToken(user)
             };
         }
 
@@ -83,7 +87,8 @@ namespace WebApi.Controllers
                 UserName = user.UserName,
                 Created = user.Created,
                 PhoneNumber = user.PhoneNumber,
-                Image = user.Image
+                Image = user.Image,
+                Token = _tokenService.CreateToken(user)
             };
         }
     }
