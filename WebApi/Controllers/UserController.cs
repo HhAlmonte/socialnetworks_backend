@@ -27,7 +27,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<ActionResult<ResponseUserDto>> Login([FromBody] LoginDto loginDto)
+        public async Task<ActionResult<ResponseUserDto>> Login([FromForm] LoginDto loginDto)
         {
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
 
@@ -62,9 +62,9 @@ namespace WebApi.Controllers
             var user = new UserEntities(
                 registrationDto.Name,
                 registrationDto.LastName,
-                registrationDto.Email);
+                registrationDto.Email,
+                registrationDto.UserName);
 
-            user.UserName = registrationDto.UserName;
             user.PhoneNumber = registrationDto.PhoneNumber;
 
             if (registrationDto.Image != null)

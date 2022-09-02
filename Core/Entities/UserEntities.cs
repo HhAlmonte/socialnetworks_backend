@@ -7,15 +7,15 @@ namespace Core.Entities
         public UserEntities(string name,
                             string lastName,
                             string email,
+                            string userName,
                             string? image = null,
-                            string? userName = null,
                             string? phoneNumber = null)
         { 
             Name = name;
             LastName = lastName;
             Email = email;
+            UserName = userName;
             Image = image ?? "No se ha ingresado imagen para este usuario";
-            UserName = userName ?? "No se ha ingresado nombre de usuario para este usuario";
             PhoneNumber = phoneNumber ?? "No se ha ingresado un número telefónico para este usuario";
         }
 

@@ -17,11 +17,13 @@ namespace WebApi.DTOs
         [Required]
         public string Password { get; set; }
 
+        [Required]
+        public string UserName { get; set; }
+
         [MaxFileSize(1 * 1024 * 1024)]
         [AllowedExtensions(new string[] { ".jpg", ".jpeg", ".png" })]
         public IFormFile? Image { get; set; }
 
-        public string? UserName { get; set; }
 
         public string? PhoneNumber { get; set; }
     }

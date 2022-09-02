@@ -26,7 +26,7 @@ namespace BussinessLogic.Logic
                 new Claim(JwtRegisteredClaimNames.Name, user.Name),
                 new Claim("Last Name", user.LastName),
                 new Claim("User Name", user.UserName),
-                new Claim("Image profile", user.Image)
+                
             };
 
             var credential = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
@@ -34,7 +34,7 @@ namespace BussinessLogic.Logic
             var tokenConfiguration = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claim),
-                Expires = DateTime.Now.AddMinutes(120),
+                Expires = DateTime.Now.AddMinutes(300),
                 SigningCredentials = credential,
                 Issuer = _config["Token:Issuer"]
             };
