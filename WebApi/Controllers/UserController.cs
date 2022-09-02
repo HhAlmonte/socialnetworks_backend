@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.DTOs;
 using WebApi.Errors;
+using Core.Interface;
+using Core.Enums;
 
 namespace WebApi.Controllers
 {
@@ -10,11 +12,13 @@ namespace WebApi.Controllers
     {
         private readonly UserManager<UserEntities> _userManager;
         private readonly SignInManager<UserEntities> _signInManager;
-        /*Imageprofileformat imageprofileformat = new Imageprofileformat();*/
+        private readonly IAzureBlobStorageService _azureBlobStorageService;
 
         public UserController(UserManager<UserEntities> userManager,
-                              SignInManager<UserEntities> signInManager)
+                              SignInManager<UserEntities> signInManager,
+                              IAzureBlobStorageService azureBlobStorageService)
         {
+            _azureBlobStorageService = azureBlobStorageService;
             _userManager = userManager;
             _signInManager = signInManager;
         }
@@ -49,25 +53,20 @@ namespace WebApi.Controllers
         }
 
         [HttpPost("Registration")]
-        public async Task<ActionResult<ResponseUserDto>> Registration([FromBody] RegistrationDto registrationDto, IFormFile image)
+        public async Task<ActionResult<ResponseUserDto>> Registration([FromForm] RegistrationDto registrationDto)
         {
-            var builder = WebApplication.CreateBuilder();
-            var connection = builder.Configuration.GetConnectionString("ConnectionContainer");
-            var container = builder.Configuration.GetConnectionString("ContainerName");
-
-            /*FileContainer fileContainer = new FileContainer(connection, container);*/
-
-            /*var imageResult = await fileContainer.UploadBlobAsync();*/
-
             var user = new UserEntities(
                 registrationDto.Name,
                 registrationDto.LastName,
-                registrationDto.Email)
+                registrationDto.Email);
+
+            user.UserName = registrationDto.UserName;
+            user.PhoneNumber = registrationDto.PhoneNumber;
+
+            if (registrationDto.Image != null)
             {
-                Image = registrationDto.Image,
-                UserName = registrationDto.UserName,
-                PhoneNumber = registrationDto.PhoneNumber
-            };
+                user.Image = await _azureBlobStorageService.UploadAsync(registrationDto.Image, ContainerEnum.IMAGEPROFILECONTAINER);
+            }
 
             var result = await _userManager.CreateAsync(user, registrationDto.Password);
 
@@ -87,19 +86,5 @@ namespace WebApi.Controllers
                 Image = user.Image
             };
         }
-
-        /*[HttpPost]
-        public async Task<Response> Login(IFormFile form)
-        { 
-            *//*var builder = WebApplication.CreateBuilder();
-            var connection = builder.Configuration.GetConnectionString("ConnectionContainer");
-            var container = builder.Configuration.GetConnectionString("ContainerName");
-
-            FileContainer fileContainer = new FileContainer(connection, container);
-            
-            string ruta = @"C:\Users\Hector Almonte\Downloads\Screenshot_1.jpg";
-
-            return await fileContainer.UploadImage("Prueba", ruta);*//*
-        }*/
     }
 }

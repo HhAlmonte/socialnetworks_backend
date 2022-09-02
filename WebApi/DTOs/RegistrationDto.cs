@@ -1,21 +1,28 @@
-﻿namespace WebApi.DTOs
+﻿using System.ComponentModel.DataAnnotations;
+using WebApi.Exceptions.ValidationAttributes;
+
+namespace WebApi.DTOs
 {
     public class RegistrationDto
     {
-        public RegistrationDto(string name, string lastName, string email)
-        {
-            Name = name;
-            LastName = lastName;
-            Email = email;
-        }
-
+        [Required]
         public string Name { get; set; }
-        
+
+        [Required]
         public string LastName { get; set; }
+
+        [Required]
         public string Email { get; set; }
-        public string? Password { get; set; }
-        public string? Image { get; set; }
+
+        [Required]
+        public string Password { get; set; }
+
+        [MaxFileSize(1 * 1024 * 1024)]
+        [AllowedExtensions(new string[] { ".jpg", ".jpeg", ".png" })]
+        public IFormFile? Image { get; set; }
+
         public string? UserName { get; set; }
+
         public string? PhoneNumber { get; set; }
     }
 }

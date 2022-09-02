@@ -2,7 +2,7 @@
 {
     public enum ContainerEnum
     {
-        IMAGES = 1,
-        DOCUMENTS = 2
+        IMAGEPROFILECONTAINER = 1,
+        DOCUMENTSCONTAINER = 2
     }
 }

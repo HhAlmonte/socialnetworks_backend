@@ -3,6 +3,7 @@ using BussinessLogic.Logic;
 using Core.Entities;
 using Core.Interface;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -30,6 +31,8 @@ builder.Services.TryAddSingleton<ISystemClock, SystemClock>();
 builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
 builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
+
+builder.Services.AddCors();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -73,6 +76,13 @@ app.UseRouting();
 app.UseAuthentication();
 
 app.UseHttpsRedirection();
+
+app.UseCors(options =>
+{
+    options.AllowAnyOrigin();
+    options.AllowAnyHeader();
+    options.AllowAnyMethod();
+});
 
 app.UseAuthorization();
 
