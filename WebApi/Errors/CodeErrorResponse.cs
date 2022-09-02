@@ -1,12 +1,13 @@
 ﻿namespace WebApi.Errors
 {
-    public class CodeErrorReponse
+    public class CodeErrorResponse
     {
-        public CodeErrorReponse(int statusCode, string message)
+        public CodeErrorResponse(int statusCode,string? message = null)
         {
             StatusCode = statusCode;
             Message = message ?? GetDefaultMessage(StatusCode);
         }
+
 
         public int StatusCode { get; set; }
         public string Message { get; set; }

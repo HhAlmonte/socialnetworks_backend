@@ -7,16 +7,6 @@ namespace WebApi.Controllers
     [ApiController]
     public class BaseApiController : ControllerBase
     {
-        [HttpGet]
-        public string Get()
-        {
-            var result = HttpContext.Response.StatusCode;
-
-            SocialNetworks socialNetworks = new SocialNetworks(result);
-
-            return socialNetworks.ToString();
-
-            /*await HttpContext.Response.WriteAsync($"Status: {result}");*/
-        }
+        
     }
 }
