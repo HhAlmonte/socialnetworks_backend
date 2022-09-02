@@ -1,9 +1,12 @@
 using BussinessLogic.Data;
+using BussinessLogic.Logic;
 using Core.Entities;
+using Core.Interface;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using WebApi.DTOs;
 using WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +27,10 @@ builder.Services.AddDbContext<SecurityDbContext>(x =>
 
 builder.Services.TryAddSingleton<ISystemClock, SystemClock>();
 
+builder.Services.AddAutoMapper(typeof(MappingProfiles));
+
+builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -31,7 +38,7 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // DbContext - DbContextData
-using(var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var loggerFactory = services.GetRequiredService<ILoggerFactory>();

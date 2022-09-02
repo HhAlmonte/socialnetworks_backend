@@ -1,7 +1,4 @@
-﻿using Core.Entities;
-using WebApi.Errors;
-
-namespace WebApi.DTOs
+﻿namespace WebApi.DTOs
 {
     public class ResponseUserDto
     {
