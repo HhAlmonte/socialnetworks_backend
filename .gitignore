@@ -94,7 +94,7 @@ StyleCopReport.xml
 *.scc
 
 #WebApi files
-appsettings.json
+WebApi/appsettings.json
 
 # Chutzpah Test files
 _Chutzpah*
