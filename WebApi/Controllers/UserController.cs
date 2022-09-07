@@ -1,10 +1,13 @@
 ﻿using Core.Entities;
+using Core.Enums;
+using Core.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using WebApi.DTOs;
 using WebApi.Errors;
-using Core.Interface;
-using Core.Enums;
+using static WebApi.DTOs.UpdateUserDto;
 
 namespace WebApi.Controllers
 {
@@ -14,12 +17,15 @@ namespace WebApi.Controllers
         private readonly SignInManager<UserEntities> _signInManager;
         private readonly IAzureBlobStorageService _azureBlobStorageService;
         private readonly ITokenService _tokenService;
+        private readonly IPasswordHasher<UserEntities> _passwordHasher;
 
         public UserController(UserManager<UserEntities> userManager,
                               SignInManager<UserEntities> signInManager,
                               IAzureBlobStorageService azureBlobStorageService,
-                              ITokenService tokenService)
+                              ITokenService tokenService,
+                              IPasswordHasher<UserEntities> passwordHasher)
         {
+            _passwordHasher = passwordHasher;
             _tokenService = tokenService;
             _azureBlobStorageService = azureBlobStorageService;
             _userManager = userManager;
@@ -90,6 +96,102 @@ namespace WebApi.Controllers
                 Image = user.Image,
                 Token = _tokenService.CreateToken(user)
             };
+        }
+
+        [Authorize]
+        [HttpGet("GetUsuario")]
+        public async Task<ActionResult<ResponseUserDto>> GetUser()
+        {
+            var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                return NotFound(new CodeErrorResponse(401, "Obtuvimos obteniendo la información del usuario. Por favor intenta otra vez"));
+            }
+
+            return new ResponseUserDto
+            {
+                Name = user.Name,
+                LastName = user.LastName,
+                Email = user.Email,
+                UserName = user.UserName,
+                Created = user.Created,
+                PhoneNumber = user.PhoneNumber,
+                Image = user.Image
+            };
+        }
+
+        [Authorize]
+        [HttpPut("NewPassword")]
+        public async Task<ActionResult<string>> UpdatePassword([FromForm] NewPasswordDto newPasswordDto)
+        {
+            var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+
+            var user = await _userManager.FindByEmailAsync(email);
+
+            var oldPassword = await _signInManager.CheckPasswordSignInAsync(user, newPasswordDto.OldPassword, false);
+
+            if (!oldPassword.Succeeded)
+            {
+                return Unauthorized(new CodeErrorResponse(401, "La contraseña ingresada es incorrecta"));
+            }
+
+            var newPassword = newPasswordDto.NewPassword;
+            var confirmPassword = newPasswordDto.ConfirmPassword;
+
+            if (!newPassword.Equals(confirmPassword))
+            {
+                return Unauthorized(new CodeErrorResponse(401, "NewPassword y ConfirmPassword no coinciden"));
+            }
+
+            user.PasswordHash = _passwordHasher.HashPassword(user, newPassword);
+
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(new CodeErrorResponse(500, "Hubo un error actualizando la contraseña. Por favor intenta de nuevo"));
+            }
+
+            return "La contraseña ha sido actualizada. Pruebe iniciando sesión nuevamente con el usuario logueado.";
+        }
+
+        [Authorize]
+        [HttpPut("NewEmail")]
+        public async Task<ActionResult<string>> UpdateEmail([FromForm] NewEmailDto newEmailDto)
+        {
+            var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+
+            var user = await _userManager.FindByEmailAsync(email);
+
+            var oldEmail = newEmailDto.OldEmail;
+
+            if (oldEmail != email)
+            {
+                return Unauthorized(new CodeErrorResponse(401, "El correo ingresado es incorrecto"));
+            }
+
+            var newEmail = newEmailDto.NewEmail;
+            var confirmEmail = newEmailDto.ConfirmEmail;
+
+            if (newEmail != confirmEmail)
+            {
+                return Unauthorized(new CodeErrorResponse(401, "newEmail y confirmEmail no coincide"));
+            }
+
+            user.Email = newEmail;
+
+            var result = await _userManager.UpdateAsync(user);
+            await _userManager.UpdateNormalizedEmailAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(new CodeErrorResponse(500, "Hubo un error cambiando el correo. Intenta otra vez"));
+            }
+
+            return "El correo ingresada fue cambiada. En tu proximo inicio de sesión ingresa tu nuevo correo";
         }
     }
 }

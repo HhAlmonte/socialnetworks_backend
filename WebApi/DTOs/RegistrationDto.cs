@@ -24,7 +24,6 @@ namespace WebApi.DTOs
         [AllowedExtensions(new string[] { ".jpg", ".jpeg", ".png" })]
         public IFormFile? Image { get; set; }
 
-
         public string? PhoneNumber { get; set; }
     }
 }

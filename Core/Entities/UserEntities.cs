@@ -15,13 +15,13 @@ namespace Core.Entities
             LastName = lastName;
             Email = email;
             UserName = userName;
-            Image = image ?? "No se ha ingresado imagen para este usuario";
-            PhoneNumber = phoneNumber ?? "No se ha ingresado un número telefónico para este usuario";
+            Image = image ?? "https://socialnetworkscontainer.blob.core.windows.net/imageprofilecontainer/DefaultImage.jpg";
+            PhoneNumber = phoneNumber;
         }
 
         public string Name { get; set; }
         public string LastName { get; set; }
-        public string Image { get; set; }
+        public string? Image { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
     }
 }

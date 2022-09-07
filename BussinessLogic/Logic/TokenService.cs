@@ -26,7 +26,7 @@ namespace BussinessLogic.Logic
                 new Claim(JwtRegisteredClaimNames.Name, user.Name),
                 new Claim("Last Name", user.LastName),
                 new Claim("User Name", user.UserName),
-                
+
             };
 
             var credential = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
