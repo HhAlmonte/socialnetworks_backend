@@ -24,21 +24,27 @@ identityBuilder.AddSignInManager<SignInManager<UserEntities>>();
 
 // Add services to the container.
 
+builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
+
+builder.Services.AddScoped<ITokenService, TokenService>();
+
+builder.Services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepository<>));
+
 builder.Services.AddControllers();
 
 builder.Services.TryAddSingleton<ISystemClock, SystemClock>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfiles));
 
-builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
-
-builder.Services.AddScoped<ITokenService, TokenService>();
-
 builder.Services.AddCors();
 
 builder.Services.AddDbContext<SecurityDbContext>(x =>
 {
     x.UseSqlServer(builder.Configuration.GetConnectionString("IdentitySecurityConnection"));
+});
+
+builder.Services.AddDbContext<ContentDbContext>( x => {
+    x.UseSqlServer(builder.Configuration.GetConnectionString("ContentConnection"));
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
@@ -92,10 +98,14 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
+        // ContentDbContext
+        var context = services.GetRequiredService<ContentDbContext>();
+        await context.Database.MigrateAsync();
+        await ContentDbContextData.SeedContentAsync(context, loggerFactory);
+
+        // IdentityDbContext
         var userManager = services.GetRequiredService<UserManager<UserEntities>>();
-
         var identityContext = services.GetRequiredService<SecurityDbContext>();
-
         await identityContext.Database.MigrateAsync();
         await SecurityDbContextData.SeedUserAsync(userManager);
     }

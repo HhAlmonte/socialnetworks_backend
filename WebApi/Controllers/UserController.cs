@@ -72,11 +72,12 @@ namespace WebApi.Controllers
                 registrationDto.UserName);
 
             user.PhoneNumber = registrationDto.PhoneNumber;
-
-            if (registrationDto.Image != null)
+            user.Image = registrationDto.Image;
+            
+            /*if (registrationDto.Image != null)
             {
                 user.Image = await _azureBlobStorageService.UploadAsync(registrationDto.Image, ContainerEnum.IMAGEPROFILECONTAINER);
-            }
+            }*/
 
             var result = await _userManager.CreateAsync(user, registrationDto.Password);
 
