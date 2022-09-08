@@ -11,35 +11,28 @@ namespace BussinessLogic.Logic
         {
             _context = context;
         }
-
-        /// <summary>
-        /// Add new entity to database
-        /// </summary>
-        /// <param name="entity"></param>
+        
         public Task<int> Add(T entity)
         {
             _context.Set<T>().Add(entity);
             return _context.SaveChangesAsync();
         }
         
-        /// <summary>
-        /// Update entity in database
-        /// </summary>
-        /// <param name="entity"></param>
         public Task<int> Update(T entity)
         {
             _context.Set<T>().Update(entity);
             return _context.SaveChangesAsync();
         }
-
-        /// <summary>
-        /// Delete entity from database
-        /// </summary>
-        /// <param name="entity"></param>
+       
         public Task<int> Delete(T entity)
         {
             _context.Set<T>().Remove(entity);
             return _context.SaveChangesAsync();
+        }
+
+        public async Task<T> GetById(string id)
+        {
+            return await _context.Set<T>().FindAsync(id);       
         }
     }
 }
