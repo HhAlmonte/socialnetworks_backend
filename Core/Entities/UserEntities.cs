@@ -15,7 +15,7 @@ namespace Core.Entities
             LastName = lastName;
             Email = email;
             UserName = userName;
-            Image = image ?? "https://socialnetworkscontainer.blob.core.windows.net/imageprofilecontainer/DefaultImage.jpg";
+            Image = image;
             PhoneNumber = phoneNumber;
         }
 

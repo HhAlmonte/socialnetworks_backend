@@ -33,7 +33,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<ActionResult<ResponseUserDto>> Login([FromForm] LoginDto loginDto)
+        public async Task<ActionResult<ResponseUserDto>> Login([FromBody] LoginDto loginDto)
         {
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
 
