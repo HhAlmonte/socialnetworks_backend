@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using WebApi.DTOs;
+using WebApi.DTOs.UserDtos;
 using WebApi.Errors;
-using static WebApi.DTOs.UpdateUserDto;
+using static WebApi.DTOs.UserDtos.UpdateUserDto;
 
 namespace WebApi.Controllers
 {

@@ -4,19 +4,21 @@ using Core.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using WebApi.DTOs;
+using WebApi.DTOs.PublicationDtos;
 using WebApi.Errors;
 
 namespace WebApi.Controllers
 {
     public class PublicationController : BaseApiController
     {
+        private readonly string? _email;
         private readonly IGenericRepository<PublicationsEntities> _publicationRepository;
         private readonly IMapper _mapper;
 
         public PublicationController(IGenericRepository<PublicationsEntities> publicationRepository,
                                      IMapper mapper)
         {
+            _email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
             _mapper = mapper;
             _publicationRepository = publicationRepository;
         }
@@ -25,8 +27,7 @@ namespace WebApi.Controllers
         [HttpPost("add")]
         public async Task<ActionResult<ResponsePublicationDto>> CreatePublication([FromForm]PublicationDto publicationDto)
         {
-            var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
-            var publication = _mapper.Map<PublicationsEntities>(publicationDto); publication.CreatedBy = email;
+            var publication = _mapper.Map<PublicationsEntities>(publicationDto); publication.CreatedBy = _email;
             var result = await _publicationRepository.Add(publication);
             
             if(result == 0) return BadRequest(new CodeErrorResponse(400, "No se pudo crear la publicación"));
@@ -39,8 +40,8 @@ namespace WebApi.Controllers
         [HttpPost("update/{id}")]
         public async Task<ActionResult<ResponsePublicationDto>> UpdatePublication(string id, [FromForm]PublicationDto publicationDto)
         {
-            var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
-            var publication = _mapper.Map<PublicationsEntities>(publicationDto); publication.Id = id;
+            var publication = _mapper.Map<PublicationsEntities>(publicationDto);
+            publication.Id = id; publication.ModifiedBy = _email;
             var result = await _publicationRepository.Update(publication);
             
             if(result == 0) return BadRequest(new CodeErrorResponse(400, "Error al actualizar la publicación"));

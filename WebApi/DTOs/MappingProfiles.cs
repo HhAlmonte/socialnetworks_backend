@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Core.Entities;
+using WebApi.DTOs.PublicationDtos;
+using WebApi.DTOs.UserDtos;
 
 namespace WebApi.DTOs
 {

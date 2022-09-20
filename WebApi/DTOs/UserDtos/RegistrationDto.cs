@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using WebApi.Exceptions.ValidationAttributes;
 
-namespace WebApi.DTOs
+namespace WebApi.DTOs.UserDtos
 {
     public class RegistrationDto
     {
@@ -23,7 +23,7 @@ namespace WebApi.DTOs
         /*[MaxFileSize(1 * 1024 * 1024)]
         [AllowedExtensions(new string[] { ".jpg", ".jpeg", ".png" })]
         public IFormFile? Image { get; set; }*/
-        
+
         public string? Image { get; set; }
 
         public string? PhoneNumber { get; set; }
