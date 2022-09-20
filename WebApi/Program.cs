@@ -24,7 +24,7 @@ identityBuilder.AddSignInManager<SignInManager<UserEntities>>();
 
 // Add services to the container.
 
-builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
+builder.Services.AddScoped<IAzureBlobStorageService, StorageServices>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 

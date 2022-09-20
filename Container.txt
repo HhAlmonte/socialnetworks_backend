@@ -1,0 +1,9 @@
+/*public async Task<string> AzureUploadAsync(IFormFile file, ContainerEnum container, string? blobName = null)
+        {
+            var blobContainer = new BlobContainerClient(azureStorageConnectionString, container.ToString().ToLower());
+            await blobContainer.CreateIfNotExistsAsync(PublicAccessType.BlobContainer);
+            blobName ??= Guid.NewGuid().ToString();
+            var blobClient = blobContainer.GetBlobClient(blobName);
+            await blobClient.UploadAsync(file.OpenReadStream());
+            return blobClient.Uri.ToString();
+        }*/
