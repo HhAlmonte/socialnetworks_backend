@@ -9,13 +9,12 @@ namespace BussinessLogic.Data
         {
             if (!userManager.Users.Any())
             {
-                var user = new UserEntities(
-                        "Hector",
-                        "Almonte",
-                        "Hbalmontess272@gmail.com",
-                        "Imagen de prueba"
-                    )
-                { 
+                var user = new UserEntities
+                {
+                    Name = "Hector",
+                    LastName = "Almonte",
+                    Email = "Hbalmontess272@gmail.com",
+                    Image = "Imagen de prueba",
                     UserName = "Sstewiie"
                 };
 

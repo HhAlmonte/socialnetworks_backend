@@ -1,5 +1,6 @@
 ﻿using Core.Entities;
 using Core.Interface;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,6 +13,7 @@ namespace BussinessLogic.Logic
     {
         private readonly SymmetricSecurityKey _key;
         private readonly IConfiguration _config;
+
         public TokenService(IConfiguration config)
         {
             _config = config;
@@ -40,6 +42,7 @@ namespace BussinessLogic.Logic
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
+            
             var token = tokenHandler.CreateToken(tokenConfiguration);
 
             return tokenHandler.WriteToken(token);

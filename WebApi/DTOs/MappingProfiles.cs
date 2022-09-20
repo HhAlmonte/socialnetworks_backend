@@ -7,8 +7,13 @@ namespace WebApi.DTOs
     {
         public MappingProfiles()
         {
-            CreateMap<UserEntities, RegistrationDto>();
-                /*.ForMember(u => u.Name, r => r.MapFrom(n => n.Name));*/
+            // user
+            CreateMap<UserEntities, ResponseUserDto>();
+            CreateMap<RegistrationDto, UserEntities>();
+            
+            // publications
+            CreateMap<PublicationDto, PublicationsEntities>();
+            CreateMap<PublicationsEntities, ResponsePublicationDto>();
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using Core.Entities;
-using Core.Enums;
+﻿using AutoMapper;
+using Core.Entities;
 using Core.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,19 +15,19 @@ namespace WebApi.Controllers
     {
         private readonly UserManager<UserEntities> _userManager;
         private readonly SignInManager<UserEntities> _signInManager;
-        private readonly IAzureBlobStorageService _azureBlobStorageService;
         private readonly ITokenService _tokenService;
         private readonly IPasswordHasher<UserEntities> _passwordHasher;
+        private readonly IMapper _mapper;
 
         public UserController(UserManager<UserEntities> userManager,
                               SignInManager<UserEntities> signInManager,
-                              IAzureBlobStorageService azureBlobStorageService,
                               ITokenService tokenService,
-                              IPasswordHasher<UserEntities> passwordHasher)
+                              IPasswordHasher<UserEntities> passwordHasher,
+                              IMapper mapper)
         {
+            _mapper = mapper;
             _passwordHasher = passwordHasher;
             _tokenService = tokenService;
-            _azureBlobStorageService = azureBlobStorageService;
             _userManager = userManager;
             _signInManager = signInManager;
         }
@@ -37,10 +37,7 @@ namespace WebApi.Controllers
         {
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
 
-            if (user == null)
-            {
-                return Unauthorized(new CodeErrorResponse(401, "El correo ingresado no existe"));
-            }
+            if (user == null) return Unauthorized(new CodeErrorResponse(401, "El correo ingresado no existe"));
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
 
@@ -49,83 +46,49 @@ namespace WebApi.Controllers
                 return Unauthorized(new CodeErrorResponse(401, "La contraseña ingresada es incorrecta"));
             }
 
-            return new ResponseUserDto
-            {
-                Name = user.Name,
-                LastName = user.LastName,
-                Email = user.Email,
-                UserName = user.UserName,
-                Created = user.Created,
-                PhoneNumber = user.PhoneNumber,
-                Image = user.Image,
-                Token = _tokenService.CreateToken(user)
-            };
+            var responseUserDto = _mapper.Map<ResponseUserDto>(user);
+
+            responseUserDto.Token = _tokenService.CreateToken(user);
+
+            return responseUserDto;
         }
 
-        [HttpPost("Registration")]
-        public async Task<ActionResult<ResponseUserDto>> Registration([FromForm] RegistrationDto registrationDto)
+        [HttpPost("Register")]
+        public async Task<ActionResult<ResponseUserDto>> Register([FromBody] RegistrationDto registrationDto)
         {
-            var user = new UserEntities(
-                registrationDto.Name,
-                registrationDto.LastName,
-                registrationDto.Email,
-                registrationDto.UserName);
-
-            user.PhoneNumber = registrationDto.PhoneNumber;
-            user.Image = registrationDto.Image;
+            var user = _mapper.Map<UserEntities>(registrationDto);
             
-            /*if (registrationDto.Image != null)
-            {
-                user.Image = await _azureBlobStorageService.UploadAsync(registrationDto.Image, ContainerEnum.IMAGEPROFILECONTAINER);
-            }*/
-
             var result = await _userManager.CreateAsync(user, registrationDto.Password);
 
-            if (!result.Succeeded)
+            if (!result.Succeeded || user == null)
             {
-                return BadRequest(new CodeErrorResponse(400));
+                return BadRequest(new CodeErrorResponse(400, "Algo salió mal. Por favor intentalo nuevamente"));
             }
+            
+            var responseUserDto = _mapper.Map<ResponseUserDto>(user);
 
-            return new ResponseUserDto
-            {
-                Name = user.Name,
-                LastName = user.LastName,
-                Email = user.Email,
-                UserName = user.UserName,
-                Created = user.Created,
-                PhoneNumber = user.PhoneNumber,
-                Image = user.Image,
-                Token = _tokenService.CreateToken(user)
-            };
+            responseUserDto.Token = _tokenService.CreateToken(user);
+
+            return responseUserDto;
         }
 
         [Authorize]
-        [HttpGet("GetUsuario")]
+        [HttpGet]
         public async Task<ActionResult<ResponseUserDto>> GetUser()
         {
             var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
 
             var user = await _userManager.FindByEmailAsync(email);
 
-            if (user == null)
-            {
-                return NotFound(new CodeErrorResponse(401, "Obtuvimos obteniendo la información del usuario. Por favor intenta otra vez"));
-            }
+            if (user == null) return NotFound(new CodeErrorResponse(401, "El usuario no existe"));
 
-            return new ResponseUserDto
-            {
-                Name = user.Name,
-                LastName = user.LastName,
-                Email = user.Email,
-                UserName = user.UserName,
-                Created = user.Created,
-                PhoneNumber = user.PhoneNumber,
-                Image = user.Image
-            };
+            var responseUserDto = _mapper.Map<ResponseUserDto>(user);
+
+            return responseUserDto;
         }
 
         [Authorize]
-        [HttpPut("NewPassword")]
+        [HttpPut("newPassword")]
         public async Task<ActionResult<string>> UpdatePassword([FromForm] NewPasswordDto newPasswordDto)
         {
             var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
@@ -160,7 +123,7 @@ namespace WebApi.Controllers
         }
 
         [Authorize]
-        [HttpPut("NewEmail")]
+        [HttpPut("newEmail")]
         public async Task<ActionResult<string>> UpdateEmail([FromForm] NewEmailDto newEmailDto)
         {
             var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
@@ -192,7 +155,7 @@ namespace WebApi.Controllers
                 return BadRequest(new CodeErrorResponse(500, "Hubo un error cambiando el correo. Intenta otra vez"));
             }
 
-            return "El correo ingresada fue cambiada. En tu proximo inicio de sesión ingresa tu nuevo correo";
+            return "Correo electronico actualizado. En tu proximo inicio de sesión ingresa tu nuevo correo";
         }
     }
 }
